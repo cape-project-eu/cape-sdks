@@ -1,0 +1,3 @@
+[submodule "ext/secapi"]
+	path = ext/secapi
+	url = git@github.com:eu-sovereign-cloud/spec.git
