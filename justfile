@@ -40,6 +40,15 @@ build_mockserver:
 run_mockserver:
     cd mockserver && go run main.go
 
+# Build the mockserver as docker image
+build_mockserver_docker tag="pulumi-cape-mockserver":
+    docker build -t {{tag}} -f mockserver/Dockerfile .
+
+# Run the previous built docker mockserver
+run_mockserver_docker tag="pulumi-cape-mockserver":
+    docker run --rm -p 8080:8080 -it {{tag}}
+
+# Setup examples
 setup_examples: (build_pulumi_sdk "true") install_pulumi_sdk
     cd provider/pulumi/sdk/nodejs && npm i
     cd examples/pulumi_nodejs && npm i
