@@ -5,6 +5,7 @@ package {{.Package}}
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"cape-project.eu/sdk-generator/provider/pulumi/config"
 	"cape-project.eu/sdk-generator/provider/pulumi/secapi/{{.APIPackage}}"
@@ -24,7 +25,19 @@ type api struct {
 
 func newAPI(ctx context.Context, tenant, {{- if not .WithoutWorkspace}} workspace,{{end}} name string) (*api, error) {
 	config := infer.GetConfig[config.Config](ctx)
-	client, err := {{.APIPackageID}}.NewClientWithResponses(config.BaseURL)
+	url := config.BaseURL
+	prefix := *config.{{.Package | pascalCase}}ProviderPrefix
+	if prefix != "" {
+		switch true {
+		case strings.HasSuffix(url, "/") && strings.HasPrefix(prefix, "/"):
+			url = url + prefix[1:]
+		case !strings.HasSuffix(url, "/") && !strings.HasPrefix(prefix, "/"):
+			url = url + "/" + prefix
+		default:
+			url = url + prefix
+		}
+	}
+	client, err := {{.APIPackageID}}.NewClientWithResponses(url)
 	if err != nil {
 		return nil, err
 	}

@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"strings"
 	"text/template"
+	"unicode"
 
 	"github.com/pb33f/libopenapi"
 	"github.com/pb33f/libopenapi/datamodel"
@@ -45,8 +46,9 @@ func GetModelsForPath(pathDir string) []ModelEntry {
 }
 
 var tmplFuncMap = template.FuncMap{
-	"lower": strings.ToLower,
-	"upper": strings.ToUpper,
+	"lower":      strings.ToLower,
+	"upper":      strings.ToUpper,
+	"pascalCase": PascalCase,
 }
 
 func ReadTemplate(name, filepath string) *template.Template {
@@ -201,6 +203,54 @@ func LowerCamel(name string) string {
 	runes := []rune(name)
 	runes[0] = []rune(strings.ToLower(string(runes[0])))[0]
 	return string(runes)
+}
+
+func PascalCase(s string) string {
+	if s == "" {
+		return ""
+	}
+
+	ascii := true
+	for i := 0; i < len(s); i++ {
+		if s[i] >= 0x80 {
+			ascii = false
+			break
+		}
+	}
+
+	if ascii {
+		out := make([]byte, 0, len(s))
+		upperNext := true
+		for i := 0; i < len(s); i++ {
+			c := s[i]
+			if (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9') {
+				if upperNext && c >= 'a' && c <= 'z' {
+					c -= 'a' - 'A'
+				}
+				out = append(out, c)
+				upperNext = false
+				continue
+			}
+			upperNext = true
+		}
+		return string(out)
+	}
+
+	var b strings.Builder
+	b.Grow(len(s))
+	upperNext := true
+	for _, r := range s {
+		if unicode.IsLetter(r) || unicode.IsDigit(r) {
+			if upperNext {
+				r = unicode.ToUpper(r)
+			}
+			b.WriteRune(r)
+			upperNext = false
+			continue
+		}
+		upperNext = true
+	}
+	return b.String()
 }
 
 func NormalizeDescription(desc string) string {
