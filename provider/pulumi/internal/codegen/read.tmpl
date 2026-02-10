@@ -6,7 +6,7 @@ import (
 	"context"
 	"fmt"
 
-	"cape-project.eu/sdk-generator/provider/pulumi/internal/utils"
+	"cape-project.eu/sdk-generator/provider/pulumi/config"
 	"github.com/pulumi/pulumi-go-provider/infer"
 )
 
@@ -14,12 +14,21 @@ func ({{.Name}}) Read(
 	ctx context.Context,
 	req infer.ReadRequest[{{.Name}}Args, {{.Name}}State],
 ) (infer.ReadResponse[{{.Name}}Args, {{.Name}}State], error) {
-	tenant := utils.GetTenantFromImputs(ctx, req.Inputs)
+	config := infer.GetConfig[config.Config](ctx)
+	var tenant{{- if not .WithoutWorkspace}}, workspace{{- end}} string
+	if req.Inputs.Tenant == nil {
+		tenant = config.Tenant
+	} else {
+		tenant = *req.Inputs.Tenant
+	}
 {{- if not .WithoutWorkspace}}
-    workspace, found := utils.GetWorkspaceFromInputs(ctx, req.Inputs)
-    if !found {
-        return infer.ReadResponse[{{.Name}}Args, {{.Name}}State]{}, fmt.Errorf("workspace not given for resource %s", req.State.Metadata.Name)
-    }
+	if req.Inputs.Workspace != nil {
+		workspace = *req.Inputs.Workspace
+	} else if config.Workspace != nil {
+		workspace = *config.Workspace
+	} else {
+		return infer.ReadResponse[{{.Name}}Args, {{.Name}}State]{}, fmt.Errorf("workspace not given for {{.Name}} resource %s", req.State.Metadata.Name)
+	}
 {{- end}}
 
 	client, err := newAPI(ctx, tenant, {{- if not .WithoutWorkspace}} workspace,{{end}} req.State.Metadata.Name)

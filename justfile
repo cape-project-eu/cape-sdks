@@ -1,5 +1,3 @@
-
-
 @_default:
     just -l
 
@@ -15,6 +13,8 @@ build_secapi_spec:
 
 # Generate necessary files inside the pulumi provider
 build_pulumi_provider:
+    rm -rf provider/pulumi/sdk
+    rm -rf provider/pulumi/bin
     cd provider/pulumi && go generate ./...
 
 # Build the pulumi SDK out of the provider files
@@ -31,3 +31,15 @@ install_pulumi_sdk:
 
 # Build everything pulumi related in one go
 build_pulumi: build_secapi_spec build_pulumi_provider build_pulumi_sdk
+
+# Generate mockserver files
+build_mockserver:
+    cd mockserver && go generate ./...
+
+# Run the mockserver locally
+run_mockserver:
+    cd mockserver && go run main.go
+
+setup_examples: (build_pulumi_sdk "true") install_pulumi_sdk
+    cd provider/pulumi/sdk/nodejs && npm i
+    cd examples/pulumi_nodejs && npm i

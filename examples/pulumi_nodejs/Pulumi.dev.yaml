@@ -1,0 +1,4 @@
+encryptionsalt: v1:YW7ZSDkGvpk=:v1:Ga9Bzfr8PlBjcw+4:mxs5KEFgNHYhW6kLgBgtCiJHe8pZRQ==
+config:
+  cape:tenant: local-test-tenant
+  cape:baseURL: http://localhost:8080

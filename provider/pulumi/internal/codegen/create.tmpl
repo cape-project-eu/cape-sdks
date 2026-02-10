@@ -6,8 +6,8 @@ import (
 	"context"
 	"fmt"
 
+	"cape-project.eu/sdk-generator/provider/pulumi/config"
 	"cape-project.eu/sdk-generator/provider/pulumi/internal/schemas"
-	"cape-project.eu/sdk-generator/provider/pulumi/internal/utils"
 	"github.com/pulumi/pulumi-go-provider/infer"
 )
 
@@ -15,20 +15,29 @@ func ({{.Name}}) Create(
 	ctx context.Context,
 	req infer.CreateRequest[{{.Name}}Args],
 ) (infer.CreateResponse[{{.Name}}State], error) {
-	tenant := utils.GetTenantFromImputs(ctx, req.Inputs)
+	config := infer.GetConfig[config.Config](ctx)
+	var tenant{{- if not .WithoutWorkspace}}, workspace{{- end}} string
+	if req.Inputs.Tenant == nil {
+		tenant = config.Tenant
+	} else {
+		tenant = *req.Inputs.Tenant
+	}
 {{- if not .WithoutWorkspace}}
-    workspace, found := utils.GetWorkspaceFromInputs(ctx, req.Inputs)
-    if !found {
-        return infer.CreateResponse[{{.Name}}State]{}, fmt.Errorf("workspace not given for resource %s", req.Name)
-    }
+	if req.Inputs.Workspace != nil {
+		workspace = *req.Inputs.Workspace
+	} else if config.Workspace != nil {
+		workspace = *config.Workspace
+	} else {
+		return infer.CreateResponse[{{.Name}}State]{}, fmt.Errorf("workspace not given for {{.Name}} resource %s", req.Name)
+	}
 {{- end}}
 
 	state := {{.Name}}State{ {{- .Name}}Args: req.Inputs}
 	if req.DryRun {
 {{- range .Outputs}}
-        {{- if not .Optional }}
-        state.{{.Name}} = {{.Type -}} {}
-        {{- end}}
+		{{- if not .Optional }}
+		state.{{.Name}} = {{.Type -}} {}
+		{{- end}}
 {{- end}}
 		return infer.CreateResponse[{{.Name}}State]{
 			ID:     "dryrun",

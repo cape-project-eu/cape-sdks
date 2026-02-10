@@ -8,7 +8,7 @@ import (
 	"fmt"
 {{- end}}
 
-	"cape-project.eu/sdk-generator/provider/pulumi/internal/utils"
+	"cape-project.eu/sdk-generator/provider/pulumi/config"
 	"github.com/pulumi/pulumi-go-provider/infer"
 )
 
@@ -16,12 +16,21 @@ func ({{.Name}}) Delete(
 	ctx context.Context,
 	req infer.DeleteRequest[{{.Name}}State],
 ) (infer.DeleteResponse, error) {
-	tenant := utils.GetTenantFromImputs(ctx, req.State.Metadata)
+	config := infer.GetConfig[config.Config](ctx)
+	var tenant{{- if not .WithoutWorkspace}}, workspace{{- end}} string
+	if req.State.Tenant == nil {
+		tenant = config.Tenant
+	} else {
+		tenant = *req.State.Tenant
+	}
 {{- if not .WithoutWorkspace}}
-    workspace, found := utils.GetWorkspaceFromInputs(ctx, req.State.Metadata)
-    if !found {
-        return infer.DeleteResponse{}, fmt.Errorf("workspace not given for resource %s", req.State.Metadata.Name)
-    }
+	if req.State.Workspace != nil {
+		workspace = *req.State.Workspace
+	} else if config.Workspace != nil {
+		workspace = *config.Workspace
+	} else {
+		return infer.DeleteResponse{}, fmt.Errorf("workspace not given for {{.Name}} resource %s", req.State.Metadata.Name)
+	}
 {{- end}}
 
 	client, err := newAPI(ctx, tenant, {{- if not .WithoutWorkspace}} workspace,{{end}} req.State.Metadata.Name)
