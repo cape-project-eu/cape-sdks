@@ -17,7 +17,7 @@ import (
 )
 
 const SchemasDir = "../../../ext/secapi/spec/schemas"
-const PulumiControlResourceFile = "../pulumi_control_resources.yaml"
+const PulumiControlResourceFile = "../pulumi.gen.yaml"
 const SchemasImportPath = "cape-project.eu/sdk-generator/provider/pulumi/internal/schemas"
 
 var resourceTemplate = codegen.ReadTemplate("resource", "codegen/resource.tmpl")

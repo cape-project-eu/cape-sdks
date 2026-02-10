@@ -59,8 +59,9 @@ func ReadTemplate(name, filepath string) *template.Template {
 	return template.Must(template.New(name).Funcs(tmplFuncMap).Parse(string(bytes)))
 }
 
-type controlResources struct {
-	Resources map[string]ControlResourceSpec `yaml:"resources"`
+type PulumiGenYaml struct {
+	SDKVersion string                         `yaml:"sdkVersion"`
+	Resources  map[string]ControlResourceSpec `yaml:"resources"`
 }
 
 type ControlResourceSpec struct {
@@ -112,12 +113,29 @@ func (c *ControlFieldSpec) UnmarshalYAML(value *yaml.Node) error {
 	}
 }
 
+func GetPulumiGenYaml(path string) (PulumiGenYaml, error) {
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return PulumiGenYaml{}, err
+	}
+
+	var doc PulumiGenYaml
+	if err := yaml.Unmarshal(data, &doc); err != nil {
+		return PulumiGenYaml{}, err
+	}
+	if doc.Resources == nil {
+		doc.Resources = map[string]ControlResourceSpec{}
+	}
+
+	return doc, nil
+}
+
 func LoadControlResources(path string) (map[string]ControlResourceSpec, error) {
 	data, err := os.ReadFile(path)
 	if err != nil {
 		return nil, err
 	}
-	var doc controlResources
+	var doc PulumiGenYaml
 	if err := yaml.Unmarshal(data, &doc); err != nil {
 		return nil, err
 	}

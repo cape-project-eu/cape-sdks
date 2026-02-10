@@ -1,7 +1,9 @@
 name: pulumi_dotnet
-description: A CAPE SDK pulumi demo program
+description: A CAPE SDK example
 runtime: dotnet
 config:
   pulumi:tags:
     value:
       pulumi:template: csharp
+packages:
+  cape: ../../provider/pulumi

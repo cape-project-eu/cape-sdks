@@ -16,7 +16,7 @@ import (
 )
 
 const SchemasDir = "../../../../ext/secapi/spec/schemas"
-const PulumiControlResourceFile = "../../pulumi_control_resources.yaml"
+const PulumiControlResourceFile = "../../pulumi.gen.yaml"
 
 func main() {
 	cwd, _ := os.Getwd()

@@ -1,10 +1,9 @@
 name: pulumi_nodejs
-description: A minimal TypeScript Pulumi program
-runtime:
-  name: nodejs
-  options:
-    packagemanager: npm
+description: A CAPE SDK example
+runtime: nodejs
 config:
   pulumi:tags:
     value:
       pulumi:template: typescript
+packages:
+  cape: ../../provider/pulumi

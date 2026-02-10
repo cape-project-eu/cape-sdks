@@ -19,7 +19,7 @@ import (
 )
 
 const (
-	PulumiControlResourceFile = "../pulumi_control_resources.yaml"
+	PulumiControlResourceFile = "../pulumi.gen.yaml"
 	SecapiSpecDir             = "../../../ext/secapi/spec"
 	ConfigTemplatePath        = "../internal/codegen/config.tmpl"
 )

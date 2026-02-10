@@ -15,7 +15,7 @@ import (
 	"github.com/pulumi/pulumi-go-provider/infer"
 )
 
-var Version string
+const Version string = "{{.PulumiGenYaml.SDKVersion}}"
 
 const Name string = "{{ .Name }}"
 

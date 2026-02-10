@@ -12,7 +12,7 @@ import (
 	"cape-project.eu/sdk-generator/provider/pulumi/internal/codegen"
 )
 
-const PulumiControlResourceFile = "pulumi_control_resources.yaml"
+const PulumiControlResourceFile = "pulumi.gen.yaml"
 const ProviderTemplatePath = "internal/codegen/provider.tmpl"
 const PulumiPluginTemplatePath = "internal/codegen/pulumi_plugin.tmpl"
 const ResourceImportBase = "cape-project.eu/sdk-generator/provider/pulumi/internal"
@@ -32,12 +32,13 @@ type providerResource struct {
 }
 
 type providerTemplateData struct {
-	Name        string
-	DisplayName string
-	Description string
-	Namespace   string
-	Imports     []providerImport
-	Resources   []providerResource
+	Name          string
+	DisplayName   string
+	Description   string
+	Namespace     string
+	PulumiGenYaml codegen.PulumiGenYaml
+	Imports       []providerImport
+	Resources     []providerResource
 }
 
 func main() {
@@ -47,6 +48,7 @@ func main() {
 		controlPath = filepath.Join(cwd, controlPath)
 	}
 
+	genYaml, err := codegen.GetPulumiGenYaml(controlPath)
 	resources, err := codegen.LoadControlResources(controlPath)
 	if err != nil {
 		fmt.Printf("error reading control resources: %v\n", err)
@@ -87,12 +89,13 @@ func main() {
 	})
 
 	data := providerTemplateData{
-		Name:        "cape",
-		DisplayName: "pulumi-cape",
-		Description: "A pulumi provider built for CAPE Project resources.",
-		Namespace:   "pulumi",
-		Imports:     imports,
-		Resources:   resourceDefs,
+		Name:          "cape",
+		DisplayName:   "pulumi-cape",
+		Description:   "A pulumi provider built for CAPE Project resources.",
+		Namespace:     "pulumi",
+		Imports:       imports,
+		Resources:     resourceDefs,
+		PulumiGenYaml: genYaml,
 	}
 
 	writeTemplate(filepath.Join(cwd, "provider.gen.go"), data, providerTemplate)

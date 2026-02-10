@@ -4,12 +4,16 @@
     <OutputType>Exe</OutputType>
     <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
+    <DefaultItemExcludes>$(DefaultItemExcludes);sdks/**/*.cs</DefaultItemExcludes>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Pulumi"
       Version="3.*" />
-    <ProjectReference Include="..\..\provider\pulumi\sdk\dotnet\Pulumi.Cape.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="sdks\pulumi-cape\Pulumi.Cape.csproj" />
   </ItemGroup>
 
 </Project>

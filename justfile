@@ -18,7 +18,7 @@ build_pulumi_provider:
     cd provider/pulumi && go generate ./...
 
 # Build the pulumi SDK out of the provider files
-build_pulumi_sdk local="false" version="0.0.0":
+build_pulumi_sdk local="true" version="0.0.0":
     rm -rf provider/pulumi/sdk
     rm -rf provider/pulumi/bin
     cd provider/pulumi && go build -o bin/pulumi-resource-cape .
@@ -47,8 +47,3 @@ build_mockserver_docker tag="pulumi-cape-mockserver":
 # Run the previous built docker mockserver
 run_mockserver_docker tag="pulumi-cape-mockserver":
     docker run --rm -p 8080:8080 -it {{tag}}
-
-# Setup examples
-setup_examples: (build_pulumi_sdk "true") install_pulumi_sdk
-    cd provider/pulumi/sdk/nodejs && npm i
-    cd examples/pulumi_nodejs && npm i
