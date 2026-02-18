@@ -4,8 +4,7 @@ WORKDIR /app/src
 COPY ./go.mod ./go.sum ./
 RUN go mod download
 
-COPY ./mockserver ./mockserver
-WORKDIR /app/src/mockserver
+COPY . .
 RUN CGO_ENABLED=0 go build -o /app/bin/mockserver
 
 FROM gcr.io/distroless/static-debian12
