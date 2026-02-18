@@ -11,16 +11,17 @@ build_secapi_spec:
     @echo "Build secapi specification"
     cd ext/secapi && make resource-apis
 
-# Generate necessary files inside the pulumi provider
-build_pulumi_provider:
+# Clean up the generated files in the pulumi provider
+clean_pulumi:
     rm -rf provider/pulumi/sdk
     rm -rf provider/pulumi/bin
+
+# Generate necessary files inside the pulumi provider
+build_pulumi_provider: clean_pulumi
     cd provider/pulumi && go generate ./...
 
 # Build the pulumi SDK out of the provider files
-build_pulumi_sdk local="true" version="0.0.0":
-    rm -rf provider/pulumi/sdk
-    rm -rf provider/pulumi/bin
+build_pulumi_sdk local="true" version="0.0.0": clean_pulumi
     cd provider/pulumi && go build -o bin/pulumi-resource-cape .
     cd provider/pulumi && pulumi package gen-sdk --version {{version}} {{ if local != "false" { "--local" } else {""} }} ./
 

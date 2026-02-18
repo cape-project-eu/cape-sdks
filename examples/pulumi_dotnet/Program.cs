@@ -16,7 +16,7 @@ return await Deployment.RunAsync(() =>
             SizeGB = 32,
             SkuRef = new ReferenceArgs
             {
-                ReferenceURN = "my-SKU-reference",
+                Resource = "my-SKU-reference",
             },
         },
         Workspace = ws.Metadata.Apply(m => m.Name),

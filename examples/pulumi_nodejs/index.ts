@@ -6,7 +6,7 @@ const bs = new cape.storage.BlockStorage('myStorage', {
   spec: {
     sizeGB: 32,
     skuRef: {
-      referenceURN: 'my-sku-ref',
+      resource: 'skus/standard',
     },
   },
 });
