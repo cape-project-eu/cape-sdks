@@ -16,6 +16,7 @@ import (
 type server struct {
 	mu            sync.RWMutex
 	blockStorages map[string]models.BlockStorage
+	images        map[string]models.Image
 }
 
 type storageSKUDefinition struct {
@@ -47,25 +48,186 @@ var storageSKUCatalog = []storageSKUDefinition{
 func RegisterServer(router gin.IRouter) {
 	RegisterHandlersWithOptions(router, &server{
 		blockStorages: map[string]models.BlockStorage{},
+		images:        map[string]models.Image{},
 	}, GinServerOptions{
 		BaseURL: "/providers/seca.storage",
 	})
 }
 
-func (s *server) ListImages(c *gin.Context, _tenant models.TenantPathParam, _params ListImagesParams) {
-	c.JSON(http.StatusNotImplemented, gin.H{"error": "not implemented"})
+func (s *server) ListImages(c *gin.Context, tenant models.TenantPathParam, _params ListImagesParams) {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+
+	items := make([]models.Image, 0)
+	for _, image := range s.images {
+		if image.Metadata == nil {
+			continue
+		}
+		if image.Metadata.Tenant == tenant {
+			items = append(items, image)
+		}
+	}
+
+	c.JSON(http.StatusOK, ImageIterator{
+		Items: items,
+		Metadata: models.ResponseMetadata{
+			Provider: "seca.storage/v1",
+			Resource: fmt.Sprintf("tenants/%s/images", tenant),
+			Verb:     "list",
+		},
+	})
 }
 
-func (s *server) DeleteImage(c *gin.Context, _tenant models.TenantPathParam, _name models.ResourcePathParam, _params DeleteImageParams) {
-	c.JSON(http.StatusNotImplemented, gin.H{"error": "not implemented"})
+func (s *server) DeleteImage(c *gin.Context, tenant models.TenantPathParam, name models.ResourcePathParam, _params DeleteImageParams) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	key := imageKey(tenant, name)
+	if _, ok := s.images[key]; !ok {
+		c.JSON(http.StatusNotFound, gin.H{"error": "image not found"})
+		return
+	}
+
+	delete(s.images, key)
+	c.JSON(http.StatusAccepted, gin.H{
+		"deleted": true,
+		"tenant":  tenant,
+		"name":    name,
+	})
 }
 
-func (s *server) GetImage(c *gin.Context, _tenant models.TenantPathParam, _name models.ResourcePathParam) {
-	c.JSON(http.StatusNotImplemented, gin.H{"error": "not implemented"})
+func (s *server) GetImage(c *gin.Context, tenant models.TenantPathParam, name models.ResourcePathParam) {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+
+	image, ok := s.images[imageKey(tenant, name)]
+	if !ok {
+		c.JSON(http.StatusNotFound, gin.H{"error": "image not found"})
+		return
+	}
+
+	c.JSON(http.StatusOK, image)
 }
 
-func (s *server) CreateOrUpdateImage(c *gin.Context, _tenant models.TenantPathParam, _name models.ResourcePathParam, _params CreateOrUpdateImageParams) {
-	c.JSON(http.StatusNotImplemented, gin.H{"error": "not implemented"})
+func (s *server) CreateOrUpdateImage(c *gin.Context, tenant models.TenantPathParam, name models.ResourcePathParam, _params CreateOrUpdateImageParams) {
+	var image models.Image
+	if err := c.ShouldBindJSON(&image); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	now := time.Now().UTC()
+
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	key := imageKey(tenant, name)
+	existing, exists := s.images[key]
+	if !exists {
+		image.Metadata = &models.RegionalResourceMetadata{
+			ApiVersion:      "v1",
+			CreatedAt:       now,
+			Kind:            "image",
+			LastModifiedAt:  now,
+			Name:            name,
+			Provider:        "seca.storage",
+			Region:          "global",
+			Resource:        fmt.Sprintf("tenants/%s/images/%s", tenant, name),
+			ResourceVersion: 1,
+			Tenant:          tenant,
+			Verb:            "put",
+		}
+		setImageState(&image, models.ResourceStatePending)
+
+		s.images[key] = image
+		version := image.Metadata.ResourceVersion
+		s.scheduleImageStateTransition(tenant, name, version, 100*time.Millisecond, models.ResourceStateCreating)
+		s.scheduleImageStateTransition(tenant, name, version, 600*time.Millisecond, models.ResourceStateActive)
+		c.JSON(http.StatusCreated, image)
+		return
+	}
+
+	setImageState(&existing, models.ResourceStateActive)
+	s.images[key] = existing
+
+	if existing.Metadata != nil {
+		image.Metadata = existing.Metadata
+	} else {
+		image.Metadata = &models.RegionalResourceMetadata{}
+	}
+
+	image.Metadata.ApiVersion = "v1"
+	image.Metadata.Kind = "image"
+	image.Metadata.Name = name
+	image.Metadata.Provider = "seca.storage"
+	image.Metadata.Region = "global"
+	image.Metadata.Resource = fmt.Sprintf("tenants/%s/images/%s", tenant, name)
+	image.Metadata.Tenant = tenant
+	image.Metadata.Verb = "put"
+
+	if image.Metadata.CreatedAt.IsZero() {
+		image.Metadata.CreatedAt = now
+	}
+	image.Metadata.LastModifiedAt = now
+	image.Metadata.ResourceVersion++
+	if image.Metadata.ResourceVersion == 0 {
+		image.Metadata.ResourceVersion = 1
+	}
+	setImageState(&image, models.ResourceStateUpdating)
+
+	s.images[key] = image
+	version := image.Metadata.ResourceVersion
+	s.scheduleImageStateTransition(tenant, name, version, 500*time.Millisecond, models.ResourceStateActive)
+	c.JSON(http.StatusOK, image)
+}
+
+func (s *server) scheduleImageStateTransition(tenant models.TenantPathParam, name models.ResourcePathParam, version int64, delay time.Duration, state models.ResourceState) {
+	go func() {
+		time.Sleep(delay)
+
+		s.mu.Lock()
+		defer s.mu.Unlock()
+
+		key := imageKey(tenant, name)
+		image, ok := s.images[key]
+		if !ok {
+			return
+		}
+
+		if image.Metadata == nil || image.Metadata.ResourceVersion != version {
+			return
+		}
+
+		setImageState(&image, state)
+		s.images[key] = image
+	}()
+}
+
+func setImageState(image *models.Image, state models.ResourceState) {
+	if image.Status == nil {
+		image.Status = &models.ImageStatus{
+			Conditions: []models.StatusCondition{},
+		}
+	}
+	if image.Status.Conditions == nil {
+		image.Status.Conditions = []models.StatusCondition{}
+	}
+	if image.Status.State == state {
+		return
+	}
+
+	image.Status.State = state
+
+	image.Status.Conditions = append(image.Status.Conditions, models.StatusCondition{
+		LastTransitionAt: time.Now().UTC(),
+		Message:          fmt.Sprintf("Image is now in %s state", state),
+		Reason:           "stateChange",
+		State:            state,
+	})
+}
+
+func imageKey(tenant models.TenantPathParam, name models.ResourcePathParam) string {
+	return fmt.Sprintf("%s-%s", tenant, name)
 }
 
 func (s *server) ListSkus(c *gin.Context, tenant models.TenantPathParam, params ListSkusParams) {
@@ -260,19 +422,17 @@ func setBlockStorageState(blockStorage *models.BlockStorage, state models.Resour
 	if blockStorage.Status.Conditions == nil {
 		blockStorage.Status.Conditions = []models.StatusCondition{}
 	}
-	if blockStorage.Status.State != nil && *blockStorage.Status.State == state {
+	if blockStorage.Status.State == state {
 		return
 	}
 
 	blockStorage.Status.SizeGB = blockStorage.Spec.SizeGB
-	blockStorage.Status.State = &state
+	blockStorage.Status.State = state
 
-	msg := fmt.Sprintf("BlockStorage is now in %s state", state)
-	reason := "stateChange"
 	blockStorage.Status.Conditions = append(blockStorage.Status.Conditions, models.StatusCondition{
 		LastTransitionAt: time.Now().UTC(),
-		Message:          &msg,
-		Reason:           &reason,
+		Message:          fmt.Sprintf("BlockStorage is now in %s state", state),
+		Reason:           "stateChange",
 		State:            state,
 	})
 }

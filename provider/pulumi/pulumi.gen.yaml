@@ -37,6 +37,19 @@ resources:
       - Status
     apiPackage: foundation/storage/v1
 
+  Image:
+    package: storage
+    withoutWorkspace: true
+    input:
+      - Labels
+      - Annotations
+      - Extensions
+      - Spec
+    output:
+      - Metadata
+      - Status
+    apiPackage: foundation/storage/v1
+
 getterFunctions:
   storage:
     GetSkus:

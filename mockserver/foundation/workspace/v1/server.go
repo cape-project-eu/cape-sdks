@@ -181,18 +181,16 @@ func setWorkspaceState(workspace *models.Workspace, state models.ResourceState) 
 	if workspace.Status.Conditions == nil {
 		workspace.Status.Conditions = []models.StatusCondition{}
 	}
-	if workspace.Status.State != nil && *workspace.Status.State == state {
+	if workspace.Status.State == state {
 		return
 	}
 
-	workspace.Status.State = &state
+	workspace.Status.State = state
 
-	msg := fmt.Sprintf("Workspace is now in %s state", state)
-	reason := "stateChange"
 	workspace.Status.Conditions = append(workspace.Status.Conditions, models.StatusCondition{
 		LastTransitionAt: time.Now().UTC(),
-		Message:          &msg,
-		Reason:           &reason,
+		Message:          fmt.Sprintf("Workspace is now in %s state", state),
+		Reason:           "stateChange",
 		State:            state,
 	})
 }

@@ -7,9 +7,10 @@ import (
 
 // goverter:variables
 // goverter:output:format assign-variable
+// goverter:useZeroValueOnPointerInconsistency
 var (
 	ConvertReferenceURNToOpenAPI    func(schemas.ReferenceURN) models.ReferenceURN
-	ConvertReferenceObjectToOpenAPI func(schemas.ReferenceObject) models.ReferenceObject
+	ConvertReferenceToOpenAPI func(schemas.Reference) models.Reference
 	ConvertReferenceURNToPulumi     func(models.ReferenceURN) schemas.ReferenceURN
-	ConvertReferenceObjectToPulumi  func(models.ReferenceObject) schemas.ReferenceObject
+	ConvertReferenceToPulumi  func(models.Reference) schemas.Reference
 )

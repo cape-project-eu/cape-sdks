@@ -80,7 +80,7 @@ func (obj {{.Name | camelCase}}API) WaitForActive() (*models.{{.Name}}, error) {
 			return nil, err
 		}
 
-		if *result.Status.State == models.ResourceStateActive {
+		if result.Status.State == models.ResourceStateActive {
 			return result, nil
 		}
 	}

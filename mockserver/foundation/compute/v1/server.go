@@ -205,18 +205,16 @@ func setInstanceState(instance *models.Instance, state models.ResourceState) {
 	if instance.Status.Conditions == nil {
 		instance.Status.Conditions = []models.StatusCondition{}
 	}
-	if instance.Status.State != nil && *instance.Status.State == state {
+	if instance.Status.State == state {
 		return
 	}
 
-	instance.Status.State = &state
+	instance.Status.State = state
 
-	msg := fmt.Sprintf("Instance is now in %s state", state)
-	reason := "stateChange"
 	instance.Status.Conditions = append(instance.Status.Conditions, models.StatusCondition{
 		LastTransitionAt: time.Now().UTC(),
-		Message:          &msg,
-		Reason:           &reason,
+		Message:          fmt.Sprintf("Instance is now in %s state", state),
+		Reason:           "stateChange",
 		State:            state,
 	})
 }
