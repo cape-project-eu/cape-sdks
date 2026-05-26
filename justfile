@@ -9,7 +9,7 @@ update_modules:
 # Build the specification in the subrepo
 build_secapi_spec:
     @echo "Build secapi specification"
-    cd ext/secapi && make resource-apis
+    cd ext/secapi && make spec-apis
 
 # Clean up the generated files in the pulumi provider
 clean_pulumi:
