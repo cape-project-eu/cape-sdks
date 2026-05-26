@@ -1,7 +1,7 @@
 sdkVersion: 0.0.0
 resources:
-  Workspace:
-    package: workspace
+  Role:
+    package: authorization
     withoutWorkspace: true
     input:
       - Labels
@@ -11,7 +11,20 @@ resources:
     output:
       - Metadata
       - Status
-    apiPackage: foundation/workspace/v1
+    apiPackage: foundation/authorization/v1
+
+  RoleAssignment:
+    package: authorization
+    withoutWorkspace: true
+    input:
+      - Labels
+      - Annotations
+      - Extensions
+      - Spec
+    output:
+      - Metadata
+      - Status
+    apiPackage: foundation/authorization/v1
 
   Instance:
     package: compute
@@ -25,8 +38,9 @@ resources:
       - Status
     apiPackage: foundation/compute/v1
 
-  BlockStorage:
-    package: storage
+  SecurityGroup:
+    package: network
+    withoutWorkspace: false
     input:
       - Labels
       - Annotations
@@ -35,7 +49,102 @@ resources:
     output:
       - Metadata
       - Status
-    apiPackage: foundation/storage/v1
+    apiPackage: foundation/network/v1
+
+  SecurityGroupRule:
+    package: network
+    withoutWorkspace: false
+    input:
+      - Labels
+      - Annotations
+      - Extensions
+      - Spec
+    output:
+      - Metadata
+      - Status
+    apiPackage: foundation/network/v1
+
+  Nic:
+    package: network
+    withoutWorkspace: false
+    input:
+      - Labels
+      - Annotations
+      - Extensions
+      - Spec
+    output:
+      - Metadata
+      - Status
+    apiPackage: foundation/network/v1
+
+  PublicIp:
+    package: network
+    withoutWorkspace: false
+    input:
+      - Labels
+      - Annotations
+      - Extensions
+      - Spec
+    output:
+      - Metadata
+      - Status
+    apiPackage: foundation/network/v1
+
+  Network:
+    package: network
+    withoutWorkspace: false
+    input:
+      - Labels
+      - Annotations
+      - Extensions
+      - Spec
+    output:
+      - Metadata
+      - Status
+    apiPackage: foundation/network/v1
+
+  InternetGateway:
+    package: network
+    withoutWorkspace: false
+    input:
+      - Labels
+      - Annotations
+      - Extensions
+      - Spec
+    output:
+      - Metadata
+      - Status
+    apiPackage: foundation/network/v1
+
+  Subnet:
+    package: network
+    withoutWorkspace: false
+    extraPaths:
+      - network
+    input:
+      - Labels
+      - Annotations
+      - Extensions
+      - Spec
+    output:
+      - Metadata
+      - Status
+    apiPackage: foundation/network/v1
+
+  RouteTable:
+    package: network
+    withoutWorkspace: false
+    extraPaths:
+      - network
+    input:
+      - Labels
+      - Annotations
+      - Extensions
+      - Spec
+    output:
+      - Metadata
+      - Status
+    apiPackage: foundation/network/v1
 
   Image:
     package: storage
@@ -50,6 +159,31 @@ resources:
       - Status
     apiPackage: foundation/storage/v1
 
+  BlockStorage:
+    package: storage
+    input:
+      - Labels
+      - Annotations
+      - Extensions
+      - Spec
+    output:
+      - Metadata
+      - Status
+    apiPackage: foundation/storage/v1
+
+  Workspace:
+    package: workspace
+    withoutWorkspace: true
+    input:
+      - Labels
+      - Annotations
+      - Extensions
+      - Spec
+    output:
+      - Metadata
+      - Status
+    apiPackage: foundation/workspace/v1
+
 getterFunctions:
   storage:
     GetSkus:
@@ -58,3 +192,4 @@ getterFunctions:
       clientFunction: ListSkus
       responseType: SkuIterator
       outputType: StorageSku
+#todo: regions get skus for network

@@ -45,7 +45,7 @@ func ({{.Name}}) Create(
 		}, nil
 	}
 
-	client, err := new{{.Name | pascalCase}}API(ctx, tenant, {{- if not .WithoutWorkspace}} workspace,{{end}} req.Name)
+	client, err := new{{.Name | pascalCase}}API(ctx, tenant, {{- if not .WithoutWorkspace}} workspace,{{end}}{{range .ExtraPaths}} req.Inputs.{{. | pascalCase}},{{end}} req.Name)
 	if err != nil {
 		return infer.CreateResponse[{{.Name}}State]{}, err
 	}
@@ -68,8 +68,12 @@ func ({{.Name}}) Create(
 		return infer.CreateResponse[{{.Name}}State]{}, err
 	}
 
+	output := convertOpenAPITo{{.Name}}State(*result)
+{{- range .ExtraPaths}}
+	output.{{. | pascalCase}} = req.Inputs.{{. | pascalCase}}
+{{- end}}
 	return infer.CreateResponse[{{.Name}}State]{
 		ID:     fmt.Sprintf("%s-{{if not .WithoutWorkspace}}%s-{{end}}%s-%s-%s", result.Metadata.Tenant, {{- if not .WithoutWorkspace}} result.Metadata.Workspace,{{end}} result.Metadata.Kind, result.Metadata.ApiVersion, result.Metadata.Name),
-		Output: convertOpenAPITo{{.Name}}State(*result),
+		Output: output,
 	}, nil
 }

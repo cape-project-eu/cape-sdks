@@ -21,6 +21,9 @@ type {{.Name}}Args struct {
 {{- if not .WithoutWorkspace}}
     Workspace *string `pulumi:"workspace,optional"`
 {{- end}}
+{{- range .ExtraPaths}}
+    {{. | pascalCase}} string `pulumi:"{{. | camelCase}}"`
+{{- end}}
 {{- range .Inputs}}
 	{{.Name}} {{.Type}} `pulumi:"{{.Tag}}"`
 {{- end}}
@@ -30,6 +33,9 @@ func (dto *{{.Name}}Args) Annotate(a infer.Annotator) {
 	a.Describe(&dto.Tenant, "The tenant for the resource. If omitted, the provider default is used.")
 {{- if not .WithoutWorkspace}}
 	a.Describe(&dto.Workspace, "The workspace for the resource. If omitted, the provider default is used. Must be configured by either means.")
+{{- end}}
+{{- range .ExtraPaths}}
+	a.Describe(&dto.{{. | pascalCase}}, "The {{.}} this resource belongs to.")
 {{- end}}
 {{- range .ArgsAnnotateLines}}
 	{{.}}

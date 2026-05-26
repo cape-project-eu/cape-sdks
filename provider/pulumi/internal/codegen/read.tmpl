@@ -31,7 +31,7 @@ func ({{.Name}}) Read(
 	}
 {{- end}}
 
-	client, err := new{{.Name | pascalCase}}API(ctx, tenant, {{- if not .WithoutWorkspace}} workspace,{{end}} req.State.Metadata.Name)
+	client, err := new{{.Name | pascalCase}}API(ctx, tenant, {{- if not .WithoutWorkspace}} workspace,{{end}}{{range .ExtraPaths}} req.State.{{. | pascalCase}},{{end}} req.State.Metadata.Name)
 	if err != nil {
 		return infer.ReadResponse[{{.Name}}Args, {{.Name}}State]{}, err
 	}
@@ -41,9 +41,13 @@ func ({{.Name}}) Read(
 		return infer.ReadResponse[{{.Name}}Args, {{.Name}}State]{}, err
 	}
 
+	state := convertOpenAPITo{{.Name}}State(*result)
+{{- range .ExtraPaths}}
+	state.{{. | pascalCase}} = req.State.{{. | pascalCase}}
+{{- end}}
 	return infer.ReadResponse[{{.Name}}Args, {{.Name}}State]{
 		ID:     fmt.Sprintf("%s-{{if not .WithoutWorkspace}}%s-{{end}}%s-%s-%s", result.Metadata.Tenant, {{- if not .WithoutWorkspace}} result.Metadata.Workspace,{{end}} result.Metadata.Kind, result.Metadata.ApiVersion, result.Metadata.Name),
 		Inputs: req.Inputs,
-		State: convertOpenAPITo{{.Name}}State(*result),
+		State: state,
 	}, nil
 }

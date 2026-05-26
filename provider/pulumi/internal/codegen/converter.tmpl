@@ -26,5 +26,8 @@ var (
 {{- if not .WithoutWorkspace}}
 	// goverter:map Metadata.Workspace Workspace
 {{- end}}
+{{- range .ExtraPaths}}
+	// goverter:ignore {{. | pascalCase}}
+{{- end}}
 	convertOpenAPIToPulumi{{.Name}}Args func(models.{{.Name}}) {{.Name}}Args
 )

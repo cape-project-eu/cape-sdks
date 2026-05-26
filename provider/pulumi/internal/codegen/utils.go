@@ -71,6 +71,7 @@ type ControlResourceSpec struct {
 	APIPackage           string      `yaml:"apiPackage"`
 	WithoutWorkspace     bool        `yaml:"withoutWorkspace"`
 	WithCustomGenerators bool        `yaml:"withCustomGenerators"`
+	ExtraPaths           []string    `yaml:"extraPaths"`
 	Input                []InOutSpec `yaml:"input"`
 	Output               []InOutSpec `yaml:"output"`
 }

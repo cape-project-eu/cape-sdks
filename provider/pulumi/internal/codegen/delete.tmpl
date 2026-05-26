@@ -33,7 +33,7 @@ func ({{.Name}}) Delete(
 	}
 {{- end}}
 
-	client, err := new{{.Name | pascalCase}}API(ctx, tenant, {{- if not .WithoutWorkspace}} workspace,{{end}} req.State.Metadata.Name)
+	client, err := new{{.Name | pascalCase}}API(ctx, tenant, {{- if not .WithoutWorkspace}} workspace,{{end}}{{range .ExtraPaths}} req.State.{{. | pascalCase}},{{end}} req.State.Metadata.Name)
 	if err != nil {
 		return infer.DeleteResponse{}, err
 	}

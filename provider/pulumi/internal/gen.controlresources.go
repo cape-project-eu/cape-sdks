@@ -115,6 +115,7 @@ type resourceDef struct {
 	APIPackageID         string
 	WithoutWorkspace     bool
 	WithCustomGenerators bool
+	ExtraPaths           []string
 	Inputs               []resourceField
 	Outputs              []resourceField
 	ResourceDesc         string
@@ -234,6 +235,7 @@ func buildResourceDef(name string, spec codegen.ControlResourceSpec, resolver *c
 		APIPackageID:         s[len(s)-1],
 		WithoutWorkspace:     spec.WithoutWorkspace,
 		WithCustomGenerators: spec.WithCustomGenerators,
+		ExtraPaths:           spec.ExtraPaths,
 		Inputs:               inputs,
 		Outputs:              outputs,
 		ResourceDesc:         resourceDesc,
