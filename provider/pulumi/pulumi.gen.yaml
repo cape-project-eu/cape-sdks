@@ -1,5 +1,17 @@
 sdkVersion: 0.0.0
 resources:
+  # KubernetesCluster:
+  #   package: kubernetes
+  #   input:
+  #     - Labels
+  #     - Annotations
+  #     - Extensions
+  #     - Spec
+  #   output:
+  #     - Metadata
+  #     - Status
+  #   apiPackage: extensions/kubernetes/v1beta1
+
   Role:
     package: authorization
     withoutWorkspace: true
@@ -202,4 +214,19 @@ getterFunctions:
       responseType: RegionIterator
       outputType: Region
       providerPrefixOverwrite: RegionsProviderPrefix
-#todo: regions get skus for network
+
+  network:
+    GetSkus:
+      apiPackage: foundation/network/v1
+      withoutWorkspace: true
+      clientFunction: ListSkus
+      responseType: SkuIterator
+      outputType: NetworkSku
+
+  # activitylog:
+  #   GetActivityLogs:
+  #     apiPackage: extensions/activitylog/v1beta1
+  #     clientFunction: ListActivityLogs
+  #     responseType: ActivityLogIterator
+  #     outputType: ActivityLog
+  #     providerPrefixOverwrite: ActivityLogProviderPrefix

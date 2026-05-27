@@ -4,6 +4,7 @@ package {{.Package}}
 
 import (
 	"context"
+	{{if not .WithoutWorkspace}}"fmt"{{end}}
 	"strings"
 
 	"cape-project.eu/provider/pulumi/config"
@@ -28,6 +29,7 @@ type {{.Name}} struct{}
 
 type {{.Name}}Args struct {
 	Tenant    *string `pulumi:"tenant,optional"`
+	{{if not .WithoutWorkspace}}Workspace *string `pulumi:"workspace,optional"`{{end}}
 	SkipToken *string `pulumi:"skipToken,optional"`
 	Limit     *int    `pulumi:"limit,optional"`
 	Labels    *string `pulumi:"labels,optional"`
@@ -71,7 +73,7 @@ func ({{.Name}}) Invoke(ctx context.Context, req infer.FunctionRequest[{{.Name}}
 	} else if config.Workspace != nil {
 		workspace = *config.Workspace
 	} else {
-		return infer.FunctionResponse[{{.Name}}Result]{}, fmt.Errorf("workspace not given for {{.Name}} call %s", req.Name)
+		return infer.FunctionResponse[{{.Name}}Result]{}, fmt.Errorf("workspace not given for {{.Name}} call")
 	}
 {{- end}}
 
