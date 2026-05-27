@@ -1,16 +1,21 @@
 sdkVersion: 0.0.0
 resources:
-  # KubernetesCluster:
-  #   package: kubernetes
-  #   input:
-  #     - Labels
-  #     - Annotations
-  #     - Extensions
-  #     - Spec
-  #   output:
-  #     - Metadata
-  #     - Status
-  #   apiPackage: extensions/kubernetes/v1beta1
+  KubernetesCluster:
+    package: kubernetes
+    input:
+      - Labels
+      - Annotations
+      - Extensions
+      - Spec
+    output:
+      - Metadata
+      - Status
+    apiPackage: extensions/kubernetes/v1beta1
+    apiFunctionOverwrites:
+      create: CreateOrUpdateClusterWithResponse
+      read: GetClusterWithResponse
+      update: CreateOrUpdateClusterWithResponse
+      delete: DeleteClusterWithResponse
 
   Role:
     package: authorization

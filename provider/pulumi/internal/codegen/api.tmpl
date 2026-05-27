@@ -60,7 +60,7 @@ func new{{.Name | pascalCase}}API(ctx context.Context, tenant, {{- if not .Witho
 }
 
 func (obj {{.Name | camelCase}}API) Get() (*models.{{.Name}}, error) {
-	getRes, err := obj.client.Get{{.Name}}WithResponse(*obj.ctx, obj.tenant, {{- if not .WithoutWorkspace}} obj.workspace,{{end}}{{range .ExtraPaths}} obj.{{. | camelCase}},{{end}} obj.name)
+	getRes, err := obj.client.{{.GetFn}}(*obj.ctx, obj.tenant, {{- if not .WithoutWorkspace}} obj.workspace,{{end}}{{range .ExtraPaths}} obj.{{. | camelCase}},{{end}} obj.name)
 	if err != nil {
 		return nil, err
 	}
@@ -72,7 +72,7 @@ func (obj {{.Name | camelCase}}API) Get() (*models.{{.Name}}, error) {
 }
 
 func (obj {{.Name | camelCase}}API) Exists() (bool, error) {
-	getRes, err := obj.client.Get{{.Name}}WithResponse(*obj.ctx, obj.tenant, {{- if not .WithoutWorkspace}} obj.workspace,{{end}}{{range .ExtraPaths}} obj.{{. | camelCase}},{{end}} obj.name)
+	getRes, err := obj.client.{{.GetFn}}(*obj.ctx, obj.tenant, {{- if not .WithoutWorkspace}} obj.workspace,{{end}}{{range .ExtraPaths}} obj.{{. | camelCase}},{{end}} obj.name)
 	if err != nil {
 		return false, err
 	}
@@ -93,7 +93,7 @@ func (obj {{.Name | camelCase}}API) WaitForActive() (*models.{{.Name}}, error) {
 }
 
 func (obj {{.Name | camelCase}}API) Create(in models.{{.Name}}) (*models.{{.Name}}, error) {
-	res, err := obj.client.CreateOrUpdate{{.Name}}WithResponse(*obj.ctx, obj.tenant, {{- if not .WithoutWorkspace}} obj.workspace,{{end}}{{range .ExtraPaths}} obj.{{. | camelCase}},{{end}} obj.name, nil, in)
+	res, err := obj.client.{{.CreateFn}}(*obj.ctx, obj.tenant, {{- if not .WithoutWorkspace}} obj.workspace,{{end}}{{range .ExtraPaths}} obj.{{. | camelCase}},{{end}} obj.name, nil, in)
 	if err != nil {
 		return nil, err
 	}
@@ -105,7 +105,7 @@ func (obj {{.Name | camelCase}}API) Create(in models.{{.Name}}) (*models.{{.Name
 }
 
 func (obj {{.Name | camelCase}}API) Update(in models.{{.Name}}) (*models.{{.Name}}, error) {
-	res, err := obj.client.CreateOrUpdate{{.Name}}WithResponse(*obj.ctx, obj.tenant, {{- if not .WithoutWorkspace}} obj.workspace,{{end}}{{range .ExtraPaths}} obj.{{. | camelCase}},{{end}} obj.name, nil, in)
+	res, err := obj.client.{{.UpdateFn}}(*obj.ctx, obj.tenant, {{- if not .WithoutWorkspace}} obj.workspace,{{end}}{{range .ExtraPaths}} obj.{{. | camelCase}},{{end}} obj.name, nil, in)
 	if err != nil {
 		return nil, err
 	}
@@ -117,7 +117,7 @@ func (obj {{.Name | camelCase}}API) Update(in models.{{.Name}}) (*models.{{.Name
 }
 
 func (obj {{.Name | camelCase}}API) Delete() error {
-	res, err := obj.client.Delete{{.Name}}WithResponse(*obj.ctx, obj.tenant, {{- if not .WithoutWorkspace}} obj.workspace,{{end}}{{range .ExtraPaths}} obj.{{. | camelCase}},{{end}} obj.name, nil)
+	res, err := obj.client.{{.DeleteFn}}(*obj.ctx, obj.tenant, {{- if not .WithoutWorkspace}} obj.workspace,{{end}}{{range .ExtraPaths}} obj.{{. | camelCase}},{{end}} obj.name, nil)
 	if err != nil {
 		return err
 	}

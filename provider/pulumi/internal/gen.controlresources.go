@@ -121,6 +121,10 @@ type resourceDef struct {
 	ResourceDesc         string
 	ArgsAnnotateLines    []string
 	StateAnnotateLines   []string
+	GetFn                string
+	CreateFn             string
+	UpdateFn             string
+	DeleteFn             string
 }
 
 func buildResourceDef(name string, spec codegen.ControlResourceSpec, resolver *codegen.SchemaResolver) resourceDef {
@@ -227,6 +231,26 @@ func buildResourceDef(name string, spec codegen.ControlResourceSpec, resolver *c
 	stateAnnotate := buildAnnotateLines(outputs)
 	resourceDesc := schemaDescriptionString(name, resolver)
 
+	getFn := fmt.Sprintf("Get%sWithResponse", name)
+	createFn := fmt.Sprintf("CreateOrUpdate%sWithResponse", name)
+	updateFn := fmt.Sprintf("CreateOrUpdate%sWithResponse", name)
+	deleteFn := fmt.Sprintf("Delete%sWithResponse", name)
+
+	if ow := spec.ApiFunctionOverwrites; ow != nil {
+		if ow.Read != nil {
+			getFn = *ow.Read
+		}
+		if ow.Create != nil {
+			createFn = *ow.Create
+		}
+		if ow.Update != nil {
+			updateFn = *ow.Update
+		}
+		if ow.Delete != nil {
+			deleteFn = *ow.Delete
+		}
+	}
+
 	s := strings.Split(spec.APIPackage, "/")
 	return resourceDef{
 		Name:                 name,
@@ -241,6 +265,10 @@ func buildResourceDef(name string, spec codegen.ControlResourceSpec, resolver *c
 		ResourceDesc:         resourceDesc,
 		ArgsAnnotateLines:    argsAnnotate,
 		StateAnnotateLines:   stateAnnotate,
+		GetFn:                getFn,
+		CreateFn:             createFn,
+		UpdateFn:             updateFn,
+		DeleteFn:             deleteFn,
 	}
 }
 

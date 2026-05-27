@@ -89,14 +89,22 @@ type PulumiGenYaml struct {
 	GetterFunctions map[string]map[string]ProviderGetterFunction `yaml:"getterFunctions"`
 }
 
+type ApiFunctionOverwrites struct {
+	Create *string `yaml:"create,omitempty"`
+	Read   *string `yaml:"read,omitempty"`
+	Update *string `yaml:"update,omitempty"`
+	Delete *string `yaml:"delete,omitempty"`
+}
+
 type ControlResourceSpec struct {
-	Package              string      `yaml:"package"`
-	APIPackage           string      `yaml:"apiPackage"`
-	WithoutWorkspace     bool        `yaml:"withoutWorkspace"`
-	WithCustomGenerators bool        `yaml:"withCustomGenerators"`
-	ExtraPaths           []string    `yaml:"extraPaths"`
-	Input                []InOutSpec `yaml:"input"`
-	Output               []InOutSpec `yaml:"output"`
+	Package               string                 `yaml:"package"`
+	APIPackage            string                 `yaml:"apiPackage"`
+	WithoutWorkspace      bool                   `yaml:"withoutWorkspace"`
+	WithCustomGenerators  bool                   `yaml:"withCustomGenerators"`
+	ExtraPaths            []string               `yaml:"extraPaths"`
+	Input                 []InOutSpec            `yaml:"input"`
+	Output                []InOutSpec            `yaml:"output"`
+	ApiFunctionOverwrites *ApiFunctionOverwrites `yaml:"apiFunctionOverwrites,omitempty"`
 }
 
 type ProviderGetterFunction struct {
