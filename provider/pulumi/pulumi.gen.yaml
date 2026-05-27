@@ -192,4 +192,14 @@ getterFunctions:
       clientFunction: ListSkus
       responseType: SkuIterator
       outputType: StorageSku
+
+  region:
+    GetRegions:
+      apiPackage: foundation/region/v1
+      withoutWorkspace: true
+      withoutTenant: true
+      clientFunction: ListRegions
+      responseType: RegionIterator
+      outputType: Region
+      providerPrefixOverwrite: RegionsProviderPrefix
 #todo: regions get skus for network

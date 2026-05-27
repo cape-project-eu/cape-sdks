@@ -39,38 +39,49 @@ func main() {
 	for packageName, functions := range genYaml.GetterFunctions {
 		for functionName, function := range functions {
 			writeTemplate(fmt.Sprintf("./%s/%s.gen.go", packageName, strings.ToLower(functionName)), tmplData{
-				Package:          packageName,
-				Name:             functionName,
-				APIPackage:       function.APIPackage,
-				WithoutWorkspace: function.WithoutWorkspace,
-				ClientFunction:   function.ClientFunction,
-				OutputType:       function.OutputType,
-				ResponseType:     function.ResponseType,
+				Package:                 packageName,
+				Name:                    functionName,
+				APIPackage:              function.APIPackage,
+				WithoutWorkspace:        function.WithoutWorkspace,
+				WithoutTenant:           function.WithoutTenant,
+				ClientFunction:          function.ClientFunction,
+				OutputType:              function.OutputType,
+				ResponseType:            function.ResponseType,
+				ProviderPrefixOverwrite: function.ProviderPrefixOverwrite,
 			})
 		}
 	}
 }
 
 type tmplData struct {
-	Package          string
-	Name             string
-	APIPackage       string
-	WithoutWorkspace bool
-	ClientFunction   string
-	OutputType       string
-	ResponseType     string
+	Package                 string
+	Name                    string
+	APIPackage              string
+	WithoutWorkspace        bool
+	WithoutTenant           bool
+	ClientFunction          string
+	OutputType              string
+	ResponseType            string
+	ProviderPrefixOverwrite *string
 }
 
 func writeTemplate(outPath string, data tmplData) {
+	dir := filepath.Dir(outPath)
+	err := os.MkdirAll(dir, 0755)
+	if err != nil {
+		fmt.Println("Error creating directory:", err)
+		return
+	}
+
 	outFile, err := os.Create(outPath)
 	if err != nil {
-		println(fmt.Errorf("error creating/opening file: %s", err))
+		fmt.Println("error creating/opening file:", err)
 		return
 	}
 	defer func() {
 		_ = outFile.Close()
 	}()
 	if err := getterFunTmpl.Execute(outFile, data); err != nil {
-		println(fmt.Errorf("error executing template: %s", err))
+		fmt.Println("error executing template:", err)
 	}
 }

@@ -41,7 +41,7 @@ type {{.Name}}Result struct {
 func ({{.Name}}) Invoke(ctx context.Context, req infer.FunctionRequest[{{.Name}}Args]) (infer.FunctionResponse[{{.Name}}Result], error) {
 	config := infer.GetConfig[config.Config](ctx)
 	url := config.BaseURL
-	prefix := *config.{{.Package | pascalCase}}ProviderPrefix
+	prefix := *config.{{- if .ProviderPrefixOverwrite}}{{.ProviderPrefixOverwrite}}{{- else -}}{{.Package | pascalCase}}ProviderPrefix{{- end}}
 	if prefix != "" {
 		switch true {
 		case strings.HasSuffix(url, "/") && strings.HasPrefix(prefix, "/"):
@@ -57,12 +57,14 @@ func ({{.Name}}) Invoke(ctx context.Context, req infer.FunctionRequest[{{.Name}}
 		return infer.FunctionResponse[{{.Name}}Result]{}, err
 	}
 
-    var tenant{{- if not .WithoutWorkspace}}, workspace{{- end}} string
+{{- if not .WithoutTenant}}
+	var tenant{{- if not .WithoutWorkspace}}, workspace{{- end}} string
 	if req.Input.Tenant == nil {
 		tenant = config.Tenant
 	} else {
 		tenant = *req.Input.Tenant
 	}
+{{- end}}
 {{- if not .WithoutWorkspace}}
 	if req.Input.Workspace != nil {
 		workspace = *req.Input.Workspace
@@ -74,7 +76,7 @@ func ({{.Name}}) Invoke(ctx context.Context, req infer.FunctionRequest[{{.Name}}
 {{- end}}
 
 	params := convert{{.Name}}ArgsToOpenAPI(req.Input)
-	res, err := client.{{.ClientFunction}}WithResponse(ctx, tenant, {{- if not .WithoutWorkspace}} workspace,{{end}} &params)
+	res, err := client.{{.ClientFunction}}WithResponse(ctx, {{- if not .WithoutTenant}} tenant,{{end}}{{- if not .WithoutWorkspace}} workspace,{{end}} &params)
 	if err != nil {
 		return infer.FunctionResponse[{{.Name}}Result]{}, err
 	}

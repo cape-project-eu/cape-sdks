@@ -49,8 +49,31 @@ var tmplFuncMap = template.FuncMap{
 	"lower":      strings.ToLower,
 	"upper":      strings.ToUpper,
 	"pascalCase": PascalCase,
-	"camelCase":  func(s string) string { return LowerCamel(PascalCase(s)) },
-	"add":        func(a, b int) int { return a + b },
+	"camelCase": func(s string) string {
+		if isUpper(s) || isLower(s) {
+			return strings.ToLower(s)
+		}
+		return LowerCamel(PascalCase(s))
+	},
+	"add": func(a, b int) int { return a + b },
+}
+
+func isUpper(s string) bool {
+	for _, r := range s {
+		if !unicode.IsUpper(r) && unicode.IsLetter(r) {
+			return false
+		}
+	}
+	return true
+}
+
+func isLower(s string) bool {
+	for _, r := range s {
+		if !unicode.IsLower(r) && unicode.IsLetter(r) {
+			return false
+		}
+	}
+	return true
 }
 
 func ReadTemplate(name, filepath string) *template.Template {
@@ -77,11 +100,13 @@ type ControlResourceSpec struct {
 }
 
 type ProviderGetterFunction struct {
-	APIPackage       string `yaml:"apiPackage"`
-	WithoutWorkspace bool   `yaml:"withoutWorkspace"`
-	ClientFunction   string `yaml:"clientFunction"`
-	OutputType       string `yaml:"outputType"`
-	ResponseType     string `yaml:"responseType"`
+	APIPackage              string  `yaml:"apiPackage"`
+	WithoutWorkspace        bool    `yaml:"withoutWorkspace"`
+	WithoutTenant           bool    `yaml:"withoutTenant"`
+	ClientFunction          string  `yaml:"clientFunction"`
+	OutputType              string  `yaml:"outputType"`
+	ResponseType            string  `yaml:"responseType"`
+	ProviderPrefixOverwrite *string `yaml:"providerPrefixOverwrite,omitempty"`
 }
 
 type InOutSpec struct {
