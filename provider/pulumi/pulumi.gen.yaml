@@ -17,6 +17,69 @@ resources:
       update: CreateOrUpdateClusterWithResponse
       delete: DeleteClusterWithResponse
 
+  KubernetesNodePool:
+    package: kubernetes
+    input:
+      - Labels
+      - Annotations
+      - Extensions
+      - Spec
+    output:
+      - Metadata
+      - Status
+    extraPaths:
+      - cluster
+    apiPackage: extensions/kubernetes/v1beta1
+    apiFunctionOverwrites:
+      create: CreateOrUpdateNodePoolWithResponse
+      read: GetNodePoolWithResponse
+      update: CreateOrUpdateNodePoolWithResponse
+      delete: DeleteNodePoolWithResponse
+
+  NetworkLoadBalancer:
+    package: loadbalancer
+    input:
+      - Labels
+      - Annotations
+      - Extensions
+      - Spec
+    output:
+      - Metadata
+      - Status
+    apiPackage: extensions/loadbalancer/v1beta1
+    providerPrefixOverwrite: LoadBalancerProviderPrefix
+
+  InternetNatGatewayInstance:
+    package: natgateway
+    input:
+      - Labels
+      - Annotations
+      - Extensions
+      - Spec
+    output:
+      - Metadata
+      - Status
+    apiPackage: extensions/natgateway/v1beta1
+    providerPrefixOverwrite: NATGatewayProviderPrefix
+
+  ObjectStorageAccount:
+    package: objectstorage
+    input:
+      - Labels
+      - Annotations
+      - Extensions
+      - Spec
+    output:
+      - Metadata
+      - Status
+    apiPackage: extensions/objectstorage/v1beta1
+    providerPrefixOverwrite: ObjectStorageProviderPrefix
+    apiFunctionOverwrites:
+      create: CreateOrUpdateAccountWithResponse
+      read: GetAccountWithResponse
+      update: CreateOrUpdateAccountWithResponse
+      delete: DeleteAccountWithResponse
+
   Role:
     package: authorization
     withoutWorkspace: true

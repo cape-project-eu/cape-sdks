@@ -121,10 +121,11 @@ type resourceDef struct {
 	ResourceDesc         string
 	ArgsAnnotateLines    []string
 	StateAnnotateLines   []string
-	GetFn                string
-	CreateFn             string
-	UpdateFn             string
-	DeleteFn             string
+	GetFn                   string
+	CreateFn                string
+	UpdateFn                string
+	DeleteFn                string
+	ProviderPrefixOverwrite *string
 }
 
 func buildResourceDef(name string, spec codegen.ControlResourceSpec, resolver *codegen.SchemaResolver) resourceDef {
@@ -265,10 +266,11 @@ func buildResourceDef(name string, spec codegen.ControlResourceSpec, resolver *c
 		ResourceDesc:         resourceDesc,
 		ArgsAnnotateLines:    argsAnnotate,
 		StateAnnotateLines:   stateAnnotate,
-		GetFn:                getFn,
-		CreateFn:             createFn,
-		UpdateFn:             updateFn,
-		DeleteFn:             deleteFn,
+		GetFn:                   getFn,
+		CreateFn:                createFn,
+		UpdateFn:                updateFn,
+		DeleteFn:                deleteFn,
+		ProviderPrefixOverwrite: spec.ProviderPrefixOverwrite,
 	}
 }
 

@@ -104,7 +104,8 @@ type ControlResourceSpec struct {
 	ExtraPaths            []string               `yaml:"extraPaths"`
 	Input                 []InOutSpec            `yaml:"input"`
 	Output                []InOutSpec            `yaml:"output"`
-	ApiFunctionOverwrites *ApiFunctionOverwrites `yaml:"apiFunctionOverwrites,omitempty"`
+	ApiFunctionOverwrites   *ApiFunctionOverwrites `yaml:"apiFunctionOverwrites,omitempty"`
+	ProviderPrefixOverwrite *string                `yaml:"providerPrefixOverwrite,omitempty"`
 }
 
 type ProviderGetterFunction struct {

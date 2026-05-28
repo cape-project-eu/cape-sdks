@@ -29,7 +29,7 @@ type {{.Name | camelCase}}API struct {
 func new{{.Name | pascalCase}}API(ctx context.Context, tenant, {{- if not .WithoutWorkspace}} workspace,{{end}}{{range .ExtraPaths}} {{. | camelCase}},{{end}} name string) (*{{.Name | camelCase}}API, error) {
 	config := infer.GetConfig[config.Config](ctx)
 	url := config.BaseURL
-	prefix := *config.{{.Package | pascalCase}}ProviderPrefix
+	prefix := *config.{{- if .ProviderPrefixOverwrite}}{{.ProviderPrefixOverwrite}}{{- else -}}{{.Package | pascalCase}}ProviderPrefix{{- end}}
 	if prefix != "" {
 		switch true {
 		case strings.HasSuffix(url, "/") && strings.HasPrefix(prefix, "/"):
