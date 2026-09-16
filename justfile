@@ -9,7 +9,7 @@ update_modules:
 # Build the specification in the subrepo
 build_secapi_spec:
     @echo "Build secapi specification"
-    cd ext/secapi && make spec-apis
+    cd ext/secapi && make build
 
 # Clean up the generated files in the pulumi provider
 clean_pulumi:
@@ -24,6 +24,7 @@ build_pulumi_provider: clean_pulumi
 build_pulumi_sdk local="true" version="0.0.0": clean_pulumi
     cd provider/pulumi && go build -o bin/pulumi-resource-cape .
     cd provider/pulumi && pulumi package gen-sdk --version {{version}} {{ if local != "false" { "--local" } else {""} }} ./
+    rm -rf provider/pulumi/sdk/go # delete go variant because it causes install issues
 
 # (Re)install the pulumi SDK locally
 install_pulumi_sdk:
@@ -48,3 +49,8 @@ build_mockserver_docker tag="pulumi-cape-mockserver":
 # Run the previous built docker mockserver
 run_mockserver_docker tag="pulumi-cape-mockserver":
     docker run --rm -p 8080:8080 -it {{tag}}
+
+# Install pulumi SDKS inside the examples
+setup_examples:
+    cd examples/pulumi_dotnet && pulumi install
+    cd examples/pulumi_nodejs && pulumi install

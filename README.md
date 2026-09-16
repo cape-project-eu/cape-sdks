@@ -37,12 +37,6 @@ just build_pulumi_sdk
 just build_pulumi
 ```
 
-Install local Pulumi plugin for examples:
-
-```bash
-just setup_examples
-```
-
 Generate/run mockserver:
 
 ```bash
@@ -56,3 +50,24 @@ Mockserver via Docker:
 just build_mockserver_docker
 just run_mockserver_docker
 ```
+
+## Run examples
+
+To run examples, utilize the mockserver.
+First, build the SDK with `just build_pulumi`, then setup the examples with `just setup_examples`.
+Setup examples install the required pulumi sdks inside the example directories.
+
+Then you will need to run the mockserver (either via docker or natively).
+
+After the mockserver has been started, cd into the example directory.
+
+There, the pulumi workflow starts. The "dev" stack has already been prepared. So on a fresh maschine,
+you will need to import the pre-existing stack after logging in locally.
+
+1. `pulumi login --local` - this logs in locally without any S3 backend or similar.
+2. `pulumi stack init dev` - this initializes the local dev stack. The passphrase is empty string.
+3. `pulumi up` - will then calculate the diff (non-existing after fresh run) and runs the diff. the user
+   then may accept the changes and the stack is deployed against the mock-server.
+4. optional: make changes to the pulumi program and redeploy with `pulumi up`.
+5. `pulumi down` - this then shuts down the stack again and deletes all stack resources.
+6. shutdown the mockserver - everything inside the memory of the server is removed. you may start again.

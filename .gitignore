@@ -34,3 +34,5 @@ go.work.sum
 __debug*
 
 schema-*.json
+
+*-stamp

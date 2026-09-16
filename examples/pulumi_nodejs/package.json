@@ -8,5 +8,8 @@
     "dependencies": {
         "@pulumi/cape": "file:sdks/pulumi-cape",
         "@pulumi/pulumi": "^3.113.0"
+    },
+    "allowScripts": {
+        "file:sdks/pulumi-cape": true
     }
 }
