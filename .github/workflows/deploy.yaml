@@ -161,6 +161,6 @@ jobs:
           REPO: self
           BRANCH: dist/sdk/pulumi
           FOLDER: provider/pulumi/sdk
-          SSH_PRIVATE_KEY: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           MESSAGE: "chore(sdk): publish pulumi sdk from ${{ github.sha }}"
           SQUASH_HISTORY: true
