@@ -158,9 +158,9 @@ jobs:
       - name: Publish Pulumi SDK to dist/sdk/pulumi
         uses: s0/git-publish-subdir-action@develop
         env:
-          REPO: git@github.com:${{ github.repository }}
+          REPO: self
           BRANCH: dist/sdk/pulumi
           FOLDER: provider/pulumi/sdk
-          SSH_PRIVATE_KEY: ${{ secrets.SDK_DIST_KEY }}
+          SSH_PRIVATE_KEY: ${{ secrets.GITHUB_TOKEN }}
           MESSAGE: "chore(sdk): publish pulumi sdk from ${{ github.sha }}"
           SQUASH_HISTORY: true
